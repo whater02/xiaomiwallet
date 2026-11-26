@@ -30,10 +30,13 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      - name: 安装 JDK 17
+      - name: 安装并切换 JDK 17
         run: |
           sudo apt-get update
           sudo apt-get install -y openjdk-17-jdk
+          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+          echo "$JAVA_HOME/bin" >> $GITHUB_PATH
+          java -version
 
       - name: 确认 Android SDK 可用
         run: |
