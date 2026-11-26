@@ -192,34 +192,46 @@ class RNL:
             return None
 
     def get_task(self, task_code: str) -> Optional[str]:
-        """获取任务信息。"""
+        """通过 taskCode 获取 userTaskId。"""
         url = f"https://{API_HOST}/mp/api/generalActivity/getTask"
+        data = {
+            'activityCode': self.activity_code,
+            'taskCode': task_code,
+            'jrairstar_ph': '98lj8puDf9Tu/WwcyMpVyQ=='
+        }
         try:
-            response = self.api.post(url, data={'activityCode': self.activity_code, 'taskCode': task_code})
+            response = self.api.post(url, data=data)
             if response and response.get('code') == 0:
-                return response['value'].get('userTaskId')
-            self.error_info = f"获取任务信息失败：{response}"
+                return response['value']['taskInfo']['userTaskId']
+            self.error_info = f'获取任务信息失败：{response}'
             return None
         except Exception as e:
             self.error_info = f'获取任务信息时发生异常：{e}'
             return None
 
     def complete_task(self, task_id: str, t_id: str, brows_click_url_id: str) -> Optional[str]:
-        """完成任务。"""
+        """完成浏览任务。"""
         url = f"https://{API_HOST}/mp/api/generalActivity/completeTask"
-        data = {
+        params = {
             'activityCode': self.activity_code,
+            'app': 'com.mipay.wallet',
+            'isNfcPhone': 'true',
+            'channel': 'mipay_indexicon_TVcard',
+            'deviceType': '2',
+            'system': '1',
+            'visitEnvironment': '2',
+            'userExtra': '{"platformType":1,"com.miui.player":"4.27.0.4","com.miui.video":"v2024090290(MiVideo-UN)","com.mipay.wallet":"6.83.0.5175.2256"}',
             'taskId': task_id,
-            'tId': t_id,
+            'browsTaskId': t_id,
             'browsClickUrlId': brows_click_url_id,
-            'completeTime': str(int(time.time() * 1000)),
-            'browseTime': str(random.randint(5, 10))
+            'clickEntryType': 'undefined',
+            'festivalStatus': '0'
         }
         try:
-            response = self.api.post(url, data=data)
+            response = self.api.get(url, params=params)
             if response and response.get('code') == 0:
-                return response['value'].get('userTaskId')
-            self.error_info = f"完成任务失败：{response}"
+                return response.get('value')
+            self.error_info = f'完成任务失败：{response}'
             return None
         except Exception as e:
             self.error_info = f'完成任务时发生异常：{e}'
@@ -227,17 +239,24 @@ class RNL:
 
     def receive_award(self, user_task_id: str) -> bool:
         """领取奖励。"""
-        url = f"https://{API_HOST}/mp/api/generalActivity/receiveAward"
-        data = {
+        url = f"https://{API_HOST}/mp/api/generalActivity/luckDraw"
+        params = {
             'activityCode': self.activity_code,
-            'userTaskId': user_task_id
+            'userTaskId': user_task_id,
+            'app': 'com.mipay.wallet',
+            'isNfcPhone': 'true',
+            'channel': 'mipay_indexicon_TVcard',
+            'deviceType': '2',
+            'system': '1',
+            'visitEnvironment': '2',
+            'userExtra': '{"platformType":1,"com.miui.player":"4.27.0.4","com.miui.video":"v2024090290(MiVideo-UN)","com.mipay.wallet":"6.83.0.5175.2256"}',
         }
         try:
-            response = self.api.post(url, data=data)
+            response = self.api.get(url, params=params)
             if response and response.get('code') == 0:
                 self.error_info = ""
                 return True
-            self.error_info = f"领取奖励失败：{response}"
+            self.error_info = f'领取奖励失败：{response}'
             return False
         except Exception as e:
             self.error_info = f'领取奖励时发生异常：{e}'
