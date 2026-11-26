@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-android:
@@ -63,6 +63,9 @@ jobs:
           find build -name "*.apk" -exec cp {} release/ \; 2>/dev/null || true
           echo "[]" > release/xiaomiconfig.json
           ls -la release/
+          APK=$(find release -name "*.apk" | head -1)
+          cp "$APK" release/xiaomi-wallet-gui-fixed.apk
+          ls -la release/
 
       - name: 上传 APK
         uses: actions/upload-artifact@v4
@@ -71,3 +74,17 @@ jobs:
           path: release/
           retention-days: 30
           if-no-files-found: error
+
+      - name: 发布 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.2.3-fixed
+          name: 修复版 v1.2.3-fixed
+          body: |
+            修复了 gui.py 中与 main.py 不一致的任务接口实现：
+            - completeTask 改用 GET + 完整参数
+            - getTask 补充 jrairstar_ph 参数并修正 userTaskId 字段路径
+            - reward 改用 luckDraw 接口
+          files: release/xiaomi-wallet-gui-fixed.apk
+          generate_release_notes: false
+          force_create_release: true
